@@ -1,6 +1,6 @@
 name: flutter_aipocr
 description: 百度OCR插件，该插件android不支持androidx。iOS的ocr库包，支持模拟器的。如上传至AppStore前，必须使用lipo命令移除模拟器架构
-version: 0.１.０
+version: 0.1.0
 author: mrliuys <qimeng083@gmail.com>
 homepage: https://github.com/MrLiuYS/flutter_aipocr.git
 
