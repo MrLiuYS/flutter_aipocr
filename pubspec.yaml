@@ -1,8 +1,8 @@
 name: flutter_aipocr
-description: A new flutter plugin project.
+description: 百度OCR.
 version: 0.0.1
-author:
-homepage:
+author: mrliuys <qimeng083@gmail.com>
+homepage: https://github.com/MrLiuYS/flutter_aipocr.git
 
 environment:
   sdk: ">=2.1.0 <3.0.0"
