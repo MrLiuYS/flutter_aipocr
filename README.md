@@ -38,4 +38,48 @@ await FlutterAipocr.init(
 
 **标明-iOS的是只支持iOS,没有去配置android**
 
+调用方法
+
+```
+try {
+      if (type == "businessLicenseOCR") {
+        res = await FlutterAipocr.businessLicenseOCR;
+      } else if (type == "generalBasicOCR") {
+        res = await FlutterAipocr.generalBasicOCR();
+      } else if (type == "generalAccurateBasicOCR") {
+        res = await FlutterAipocr.generalAccurateBasicOCR();
+      } else if (type == "generalOCR") {
+        res = await FlutterAipocr.generalOCR();
+      } else if (type == "generalAccurateOCR") {
+        res = await FlutterAipocr.generalAccurateOCR();
+      } else if (type == "generalEnchancedOCR") {
+        res = await FlutterAipocr.generalEnchancedOCR();
+      } else if (type == "webImageOCR") {
+        res = await FlutterAipocr.webImageOCR;
+      } else if (type == "idcardOCROnlineFront") {
+        res = await FlutterAipocr.idcardOCROnlineFront;
+      } else if (type == "idcardOCROnlineBack") {
+        res = await FlutterAipocr.idcardOCROnlineBack;
+      } else if (type == "localIdcardOCROnlineFront") {
+        res = await FlutterAipocr.localIdcardOCROnlineFront;
+      } else if (type == "localIdcardOCROnlineBack") {
+        res = await FlutterAipocr.localIdcardOCROnlineBack;
+      } else if (type == "bankCardOCROnline") {
+        res = await FlutterAipocr.bankCardOCROnline;
+      } else if (type == "drivingLicenseOCR") {
+        res = await FlutterAipocr.drivingLicenseOCR;
+      } else if (type == "vehicleLicenseOCR") {
+        res = await FlutterAipocr.vehicleLicenseOCR;
+      } else if (type == "plateLicenseOCR") {
+        res = await FlutterAipocr.plateLicenseOCR;
+      } else if (type == "receiptOCR") {
+        res = await FlutterAipocr.receiptOCR;
+      } else if (type == "iOCR") {
+        res = await FlutterAipocr.receiptOCR;
+      }
+    } on FlutterError catch (e) {
+      res = <String, dynamic>{"错误": e.message};
+    }
+    print(res.toString());
+```
 
