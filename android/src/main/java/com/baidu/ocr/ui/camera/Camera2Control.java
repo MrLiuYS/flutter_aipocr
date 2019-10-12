@@ -40,8 +40,8 @@ import android.media.ImageReader;
 import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerThread;
-import android.support.annotation.NonNull;
-import android.support.v4.content.ContextCompat;
+import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import android.util.Size;
 import android.util.SparseIntArray;
 import android.view.Surface;
@@ -225,7 +225,8 @@ public class Camera2Control implements ICameraControl {
 
     private void openCamera(int width, int height) {
         // 6.0+的系统需要检查系统权限 。
-        if (ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA)
+        final boolean targetsMOrHigher = context.getApplicationInfo().targetSdkVersion >= android.os.Build.VERSION_CODES.M;
+        if (targetsMOrHigher&&ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA)
                 != PackageManager.PERMISSION_GRANTED) {
             requestCameraPermission();
             return;

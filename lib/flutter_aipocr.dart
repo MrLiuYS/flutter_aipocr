@@ -40,11 +40,9 @@ class FlutterAipocr {
       'detect_direction': detectDirection != null ? detectDirection : "true",
     };
 
-    final String jsonStr =
-        await _channel.invokeMethod('generalBasicOCR', params);
+    var fromRes = await _channel.invokeMethod('generalBasicOCR', params);
 
-    Map<String, dynamic> res = json.decode(jsonStr);
-    return res;
+    return transferOCRData(fromRes);
   }
 
   /// 通用文字识别(高精度版)
@@ -54,11 +52,10 @@ class FlutterAipocr {
       'language_type': languageType != null ? languageType : "CHN_ENG",
       'detect_direction': detectDirection != null ? detectDirection : "true",
     };
-    final String jsonStr =
+    var fromRes =
         await _channel.invokeMethod('generalAccurateBasicOCR', params);
 
-    Map<String, dynamic> res = json.decode(jsonStr);
-    return res;
+    return transferOCRData(fromRes);
   }
 
   /// 通用文字识别(含位置信息版)
@@ -68,10 +65,9 @@ class FlutterAipocr {
       'language_type': languageType != null ? languageType : "CHN_ENG",
       'detect_direction': detectDirection != null ? detectDirection : "true",
     };
-    final String jsonStr = await _channel.invokeMethod('generalOCR', params);
+    var fromRes = await _channel.invokeMethod('generalOCR', params);
 
-    Map<String, dynamic> res = json.decode(jsonStr);
-    return res;
+    return transferOCRData(fromRes);
   }
 
   /// 通用文字识别(高精度含位置版)
@@ -81,11 +77,8 @@ class FlutterAipocr {
       'language_type': languageType != null ? languageType : "CHN_ENG",
       'detect_direction': detectDirection != null ? detectDirection : "true",
     };
-    final String jsonStr =
-        await _channel.invokeMethod('generalAccurateOCR', params);
-
-    Map<String, dynamic> res = json.decode(jsonStr);
-    return res;
+    var fromRes = await _channel.invokeMethod('generalAccurateOCR', params);
+    return transferOCRData(fromRes);
   }
 
   /// 通用文字识别(含生僻字版)
@@ -95,107 +88,84 @@ class FlutterAipocr {
       'language_type': languageType != null ? languageType : "CHN_ENG",
       'detect_direction': detectDirection != null ? detectDirection : "true",
     };
-    final String jsonStr =
-        await _channel.invokeMethod('generalEnchancedOCR', params);
+    var fromRes = await _channel.invokeMethod('generalEnchancedOCR', params);
 
-    Map<String, dynamic> res = json.decode(jsonStr);
-    return res;
+    return transferOCRData(fromRes);
   }
 
   /// 网络图片文字识别
   static Future<Map<String, dynamic>> get webImageOCR async {
-    final String jsonStr = await _channel.invokeMethod('webImageOCR');
+    var fromRes = await _channel.invokeMethod('webImageOCR');
 
-    Map<String, dynamic> res = json.decode(jsonStr);
-    return res;
+    return transferOCRData(fromRes);
   }
 
   /// 身份证正面拍照识别
   static Future<Map<String, dynamic>> get idcardOCROnlineFront async {
-    final String jsonStr = await _channel.invokeMethod('idcardOCROnlineFront');
+    var fromRes = await _channel.invokeMethod('idcardOCROnlineFront');
 
-    Map<String, dynamic> res = json.decode(jsonStr);
-    return res;
+    return transferOCRData(fromRes);
   }
 
   /// 身份证反面拍照识别
   static Future<Map<String, dynamic>> get idcardOCROnlineBack async {
-    final String jsonStr = await _channel.invokeMethod('idcardOCROnlineBack');
+    var fromRes = await _channel.invokeMethod('idcardOCROnlineBack');
 
-    Map<String, dynamic> res = json.decode(jsonStr);
-
-    return res;
+    return transferOCRData(fromRes);
   }
 
   /// 身份证正面(嵌入式质量控制+云端识别)
   static Future<Map<String, dynamic>> get localIdcardOCROnlineFront async {
-    final String jsonStr =
-        await _channel.invokeMethod('localIdcardOCROnlineFront');
-
-    Map<String, dynamic> res = json.decode(jsonStr);
-    return res;
+    var fromRes = await _channel.invokeMethod('localIdcardOCROnlineFront');
+    return transferOCRData(fromRes);
   }
 
   /// 身份证反面(嵌入式质量控制+云端识别)
   static Future<Map<String, dynamic>> get localIdcardOCROnlineBack async {
-    final String jsonStr =
-        await _channel.invokeMethod('localIdcardOCROnlineBack');
+    var fromRes = await _channel.invokeMethod('localIdcardOCROnlineBack');
 
-    Map<String, dynamic> res = json.decode(jsonStr);
-    return res;
+    return transferOCRData(fromRes);
   }
 
   /// 银行卡正面拍照识别
   static Future<Map<String, dynamic>> get bankCardOCROnline async {
-    final String jsonStr = await _channel.invokeMethod('bankCardOCROnline');
-
-    Map<String, dynamic> res = json.decode(jsonStr);
-    return res;
+    var fromRes = await _channel.invokeMethod('bankCardOCROnline');
+    return transferOCRData(fromRes);
   }
 
   /// 驾驶证识别
   static Future<Map<String, dynamic>> get drivingLicenseOCR async {
-    final String jsonStr = await _channel.invokeMethod('drivingLicenseOCR');
+    var fromRes = await _channel.invokeMethod('drivingLicenseOCR');
 
-    Map<String, dynamic> res = json.decode(jsonStr);
-
-    return res;
+    return transferOCRData(fromRes);
   }
 
   /// 行驶证识别
   static Future<Map<String, dynamic>> get vehicleLicenseOCR async {
-    final String jsonStr = await _channel.invokeMethod('vehicleLicenseOCR');
+    var fromRes = await _channel.invokeMethod('vehicleLicenseOCR');
 
-    Map<String, dynamic> res = json.decode(jsonStr);
-
-    return res;
+    return transferOCRData(fromRes);
   }
 
   /// 车牌识别
   static Future<Map<String, dynamic>> get plateLicenseOCR async {
-    final String jsonStr = await _channel.invokeMethod('plateLicenseOCR');
+    var fromRes = await _channel.invokeMethod('plateLicenseOCR');
 
-    Map<String, dynamic> res = json.decode(jsonStr);
-
-    return res;
+    return transferOCRData(fromRes);
   }
 
   /// 营业执照识别
   static Future<Map<String, dynamic>> get businessLicenseOCR async {
-    final String jsonStr = await _channel.invokeMethod('businessLicenseOCR');
+    var fromRes = await _channel.invokeMethod('businessLicenseOCR');
 
-    Map<String, dynamic> res = json.decode(jsonStr);
-
-    return res;
+    return transferOCRData(fromRes);
   }
 
   /// 票据识别
   static Future<Map<String, dynamic>> get receiptOCR async {
-    final String jsonStr = await _channel.invokeMethod('receiptOCR');
+    var fromRes = await _channel.invokeMethod('receiptOCR');
 
-    Map<String, dynamic> res = json.decode(jsonStr);
-
-    return res;
+    return transferOCRData(fromRes);
   }
 
   /// 自定义模板识别
@@ -204,10 +174,25 @@ class FlutterAipocr {
     final Map<String, dynamic> params = <String, dynamic>{
       'options': options != null ? options : <String, dynamic>{},
     };
-    final String jsonStr = await _channel.invokeMethod('iOCR', params);
+    var fromRes = await _channel.invokeMethod('iOCR', params);
 
-    Map<String, dynamic> res = json.decode(jsonStr);
+    return transferOCRData(fromRes);
+  }
 
-    return res;
+  static Future<Map<String, dynamic>> transferOCRData(
+      Map<Object, Object> fromRes) async {
+//    assert(fromRes != null);
+
+    if (fromRes != null) {
+      print("ocr: " + fromRes.toString());
+
+      final Map<String, Object> toMap = <String, Object>{};
+      for (String key in fromRes.keys) {
+        toMap[key] = fromRes[key];
+      }
+      return toMap;
+    } else {
+      return fromRes;
+    }
   }
 }

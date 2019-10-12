@@ -8,6 +8,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 
 import com.baidu.idcardquality.IDcardQualityProcess;
+import com.baidu.ocr.sdk.utils.ImageUtil;
 import com.baidu.ocr.ui.crop.CropView;
 import com.baidu.ocr.ui.crop.FrameOverlayView;
 import com.nongfadai.flutter_aipocr.R;
@@ -26,8 +27,8 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.provider.MediaStore;
-import android.support.annotation.NonNull;
-import android.support.v4.app.ActivityCompat;
+import androidx.annotation.NonNull;
+import androidx.core.app.ActivityCompat;
 import android.view.Surface;
 import android.view.View;
 import android.widget.ImageView;
@@ -130,13 +131,17 @@ public class CameraActivity extends Activity {
     @Override
     protected void onPause() {
         super.onPause();
-        cameraView.stop();
+        if(cameraView!=null){
+            cameraView.stop();
+        }
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        cameraView.start();
+        if(cameraView!=null){
+            cameraView.start();
+        }
     }
 
     private void initParams() {
@@ -312,8 +317,10 @@ public class CameraActivity extends Activity {
                 public void run() {
                     takePictureContainer.setVisibility(View.INVISIBLE);
                     if (cropMaskView.getMaskType() == MaskView.MASK_TYPE_NONE) {
-                        cropView.setFilePath(outputFile.getAbsolutePath());
-                        showCrop();
+                        displayImageView.setImageBitmap(bitmap);
+                        showResultConfirm();
+//                        cropView.setFilePath(outputFile.getAbsolutePath());
+//                        showCrop();
                     } else if (cropMaskView.getMaskType() == MaskView.MASK_TYPE_BANK_CARD) {
                         cropView.setFilePath(outputFile.getAbsolutePath());
                         cropMaskView.setVisibility(View.INVISIBLE);
@@ -371,10 +378,15 @@ public class CameraActivity extends Activity {
             @Override
             public void run() {
                 try {
+
+//                    final File tempImage = new File(getCacheDir(), String.valueOf(System.currentTimeMillis()));
                     FileOutputStream fileOutputStream = new FileOutputStream(outputFile);
                     Bitmap bitmap = ((BitmapDrawable) displayImageView.getDrawable()).getBitmap();
-                    bitmap.compress(Bitmap.CompressFormat.JPEG, 100, fileOutputStream);
+                    bitmap.compress(Bitmap.CompressFormat.JPEG, 50, fileOutputStream);
                     fileOutputStream.close();
+
+//                    ImageUtil.resize(tempImage.getAbsolutePath(), outputFile.getAbsolutePath(), 1280, 1280, 70);
+
                 } catch (IOException e) {
                     e.printStackTrace();
                 }

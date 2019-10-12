@@ -17,6 +17,7 @@ import com.baidu.ocr.ui.camera.CameraActivity;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
@@ -30,6 +31,7 @@ public class FlutterAipocrPlugin implements MethodCallHandler {
   /** Plugin registration. */
 
   private Map<String,Result> resultMap;
+  private Map<String,String> imageMap;
   private Activity activity;
   private Registrar registrar;
 
@@ -47,10 +49,16 @@ public class FlutterAipocrPlugin implements MethodCallHandler {
   private static final int REQUEST_CODE_BUSINESS_LICENSE = 123;//营业执照
   private static final int REQUEST_CODE_RECEIPT = 124;//通用票据识别
 
+  private SubmitDialog submitDialog;
+
 
   private FlutterAipocrPlugin(Activity activity) {
     this.resultMap = new HashMap<>();
+    this.imageMap = new HashMap<>();
+
     this.activity = activity;
+
+    this.submitDialog=new SubmitDialog(activity);
   }
 
   public static void registerWith(final Registrar registrar) {
@@ -65,7 +73,7 @@ public class FlutterAipocrPlugin implements MethodCallHandler {
   }
 
 
-  private void recIDCard(String idCardSide, String filePath, final String contentType) {
+  private void recIDCard(String idCardSide, final String filePath, final String contentType) {
     IDCardParams param = new IDCardParams();
     param.setImageFile(new File(filePath));
     // 设置身份证正反面
@@ -73,25 +81,24 @@ public class FlutterAipocrPlugin implements MethodCallHandler {
     // 设置方向检测
     param.setDetectDirection(true);
     // 设置图像参数压缩质量0-100, 越大图像质量越好但是请求时间越长。 不设置则默认值为20
-    param.setImageQuality(20);
+    param.setImageQuality(70);
 
+    if(submitDialog!=null){
+      submitDialog.show();
+    }
     OCR.getInstance(activity).recognizeIDCard(param, new OnResultListener<IDCardResult>() {
       @Override
       public void onResult(IDCardResult result) {
         if (result != null) {
-          Log.d("mrliuys", result.getJsonRes());
-          Result result1 = resultMap.get(contentType);
-          if (result1 != null){
-            result1.success(result.getJsonRes());
-          }
+
+          resultFinish(contentType,true,filePath,result.getJsonRes());
         }
       }
       @Override
       public void onError(OCRError error) {
-        Result result1 = resultMap.get(contentType);
-        if (result1 != null){
-          result1.error(String.valueOf(error.getErrorCode()),error.getMessage(),null);
-        }
+
+        resultFinish(contentType,false,filePath,error.getMessage());
+
       }
     });
   }
@@ -105,149 +112,178 @@ public class FlutterAipocrPlugin implements MethodCallHandler {
 
         // 识别成功回调，通用文字识别
         if (requestCode == REQUEST_CODE_GENERAL_BASIC && resultCode == Activity.RESULT_OK) {
-          RecognizeService.recGeneralBasic(registrar.context(), FileUtil.getSaveFile(registrar.context()).getAbsolutePath(),
+
+          final String imagePath = imageMap.get(String.valueOf(REQUEST_CODE_GENERAL_BASIC));
+          if(submitDialog!=null){
+            submitDialog.show();
+          }
+          RecognizeService.recGeneralBasic(registrar.context(), imagePath,
                   new RecognizeService.ServiceListener() {
                     @Override
-                    public void onResult(String result) {
-                      Log.d("mrliuys", result);
+                    public void onResult(boolean success, String result) {
 
-                      Result result1 = resultMap.get(String.valueOf(REQUEST_CODE_GENERAL_BASIC));
-                      if (result1 != null){
-                        result1.success(result);
-                      }
+                      resultFinish(String.valueOf(REQUEST_CODE_GENERAL_BASIC),success,imagePath,result);
+
                     }
                   });
         }
         // 识别成功回调，通用文字识别（高精度版）
         if (requestCode == REQUEST_CODE_ACCURATE_BASIC && resultCode == Activity.RESULT_OK) {
-          RecognizeService.recAccurateBasic(registrar.context(), FileUtil.getSaveFile(registrar.context()).getAbsolutePath(),
+
+          final String imagePath = imageMap.get(String.valueOf(REQUEST_CODE_ACCURATE_BASIC));
+          if(submitDialog!=null){
+            submitDialog.show();
+          }
+          RecognizeService.recAccurateBasic(registrar.context(), imagePath,
                   new RecognizeService.ServiceListener() {
                     @Override
-                    public void onResult(String result) {
-                      Log.d("mrliuys", result);
+                    public void onResult(boolean success, String result) {
 
-                      Result result1 = resultMap.get(String.valueOf(REQUEST_CODE_ACCURATE_BASIC));
-                      if (result1 != null){
-                        result1.success(result);
-                      }
+                      resultFinish(String.valueOf(REQUEST_CODE_ACCURATE_BASIC),success,imagePath,result);
+
                     }
                   });
         }
         // 识别成功回调，通用文字识别（含位置信息）
         if (requestCode == REQUEST_CODE_GENERAL && resultCode == Activity.RESULT_OK) {
-          RecognizeService.recGeneral(registrar.context(), FileUtil.getSaveFile(registrar.context()).getAbsolutePath(),
+          final String imagePath = imageMap.get(String.valueOf(REQUEST_CODE_GENERAL));
+          if(submitDialog!=null){
+            submitDialog.show();
+          }
+          RecognizeService.recGeneral(registrar.context(), imagePath,
                   new RecognizeService.ServiceListener() {
                     @Override
-                    public void onResult(String result) {
-                      Result result1 = resultMap.get(String.valueOf(REQUEST_CODE_GENERAL));
-                      if (result1 != null){
-                        result1.success(result);
-                      }
+                    public void onResult(boolean success, String result) {
+
+                      resultFinish(String.valueOf(REQUEST_CODE_GENERAL),success,imagePath,result);
+
                     }
                   });
         }
         // 识别成功回调，通用文字识别（含位置信息高精度版）
         if (requestCode == REQUEST_CODE_ACCURATE && resultCode == Activity.RESULT_OK) {
-          RecognizeService.recAccurate(registrar.context(), FileUtil.getSaveFile(registrar.context()).getAbsolutePath(),
+          final String imagePath = imageMap.get(String.valueOf(REQUEST_CODE_ACCURATE));
+          if(submitDialog!=null){
+            submitDialog.show();
+          }
+          RecognizeService.recAccurate(registrar.context(), imagePath,
                   new RecognizeService.ServiceListener() {
                     @Override
-                    public void onResult(String result) {
-                      Result result1 = resultMap.get(String.valueOf(REQUEST_CODE_ACCURATE));
-                      if (result1 != null){
-                        result1.success(result);
-                      }
+                    public void onResult(boolean success, String result) {
+
+                      resultFinish(String.valueOf(REQUEST_CODE_ACCURATE),success,imagePath,result);
+
                     }
                   });
         }
         // 识别成功回调，通用文字识别（含生僻字版）
         if (requestCode == REQUEST_CODE_GENERAL_ENHANCED && resultCode == Activity.RESULT_OK) {
-          RecognizeService.recGeneralEnhanced(registrar.context(), FileUtil.getSaveFile(registrar.context()).getAbsolutePath(),
+
+          final String imagePath = imageMap.get(String.valueOf(REQUEST_CODE_GENERAL_ENHANCED));
+          if(submitDialog!=null){
+            submitDialog.show();
+          }
+          RecognizeService.recGeneralEnhanced(registrar.context(), imagePath,
                   new RecognizeService.ServiceListener() {
                     @Override
-                    public void onResult(String result) {
-                      Result result1 = resultMap.get(String.valueOf(REQUEST_CODE_GENERAL_ENHANCED));
-                      if (result1 != null){
-                        result1.success(result);
-                      }
+                    public void onResult(boolean success, String result) {
+
+                      resultFinish(String.valueOf(REQUEST_CODE_GENERAL_ENHANCED),success,imagePath,result);
+
                     }
                   });
         }
         // 识别成功回调，网络图片文字识别
         if (requestCode == REQUEST_CODE_GENERAL_WEBIMAGE && resultCode == Activity.RESULT_OK) {
-          RecognizeService.recWebimage(registrar.context(), FileUtil.getSaveFile(registrar.context()).getAbsolutePath(),
+          final String imagePath = imageMap.get(String.valueOf(REQUEST_CODE_GENERAL_WEBIMAGE));
+          if(submitDialog!=null){
+            submitDialog.show();
+          }
+          RecognizeService.recWebimage(registrar.context(), imagePath,
                   new RecognizeService.ServiceListener() {
                     @Override
-                    public void onResult(String result) {
-                      Result result1 = resultMap.get(String.valueOf(REQUEST_CODE_GENERAL_WEBIMAGE));
-                      if (result1 != null){
-                        result1.success(result);
-                      }
+                    public void onResult(boolean success, String result) {
+
+                      resultFinish(String.valueOf(REQUEST_CODE_GENERAL_WEBIMAGE),success,imagePath,result);
+
                     }
                   });
         }
 
         // 识别成功回调，银行卡识别
         if (requestCode == REQUEST_CODE_BANKCARD && resultCode == Activity.RESULT_OK) {
-          RecognizeService.recBankCard(registrar.context(), FileUtil.getSaveFile(registrar.context()).getAbsolutePath(),
+          final String imagePath = imageMap.get(String.valueOf(REQUEST_CODE_BANKCARD));
+          if(submitDialog!=null){
+            submitDialog.show();
+          }
+          RecognizeService.recBankCard(registrar.context(), imagePath,
                   new RecognizeService.ServiceListener() {
                     @Override
-                    public void onResult(String result) {
-                      Result result1 = resultMap.get(String.valueOf(REQUEST_CODE_BANKCARD));
-                      if (result1 != null){
-                        result1.success(result);
-                      }
+                    public void onResult(boolean success, String result) {
+
+                      resultFinish(String.valueOf(REQUEST_CODE_BANKCARD),success,imagePath,result);
+
                     }
                   });
         }
         // 识别成功回调，行驶证识别
         if (requestCode == REQUEST_CODE_VEHICLE_LICENSE && resultCode == Activity.RESULT_OK) {
-          RecognizeService.recVehicleLicense(registrar.context(), FileUtil.getSaveFile(registrar.context()).getAbsolutePath(),
+          final String imagePath = imageMap.get(String.valueOf(REQUEST_CODE_VEHICLE_LICENSE));
+          if(submitDialog!=null){
+            submitDialog.show();
+          }
+          RecognizeService.recVehicleLicense(registrar.context(), imagePath,
                   new RecognizeService.ServiceListener() {
                     @Override
-                    public void onResult(String result) {
-                      Result result1 = resultMap.get(String.valueOf(REQUEST_CODE_VEHICLE_LICENSE));
-                      if (result1 != null){
-                        result1.success(result);
-                      }
+                    public void onResult(boolean success, String result) {
+
+                      resultFinish(String.valueOf(REQUEST_CODE_VEHICLE_LICENSE),success,imagePath,result);
+
                     }
                   });
         }
         // 识别成功回调，驾驶证识别
         if (requestCode == REQUEST_CODE_DRIVING_LICENSE && resultCode == Activity.RESULT_OK) {
-          RecognizeService.recDrivingLicense(registrar.context(), FileUtil.getSaveFile(registrar.context()).getAbsolutePath(),
+          final String imagePath = imageMap.get(String.valueOf(REQUEST_CODE_DRIVING_LICENSE));
+          if(submitDialog!=null){
+            submitDialog.show();
+          }
+          RecognizeService.recDrivingLicense(registrar.context(), imagePath,
                   new RecognizeService.ServiceListener() {
                     @Override
-                    public void onResult(String result) {
-                      Result result1 = resultMap.get(String.valueOf(REQUEST_CODE_DRIVING_LICENSE));
-                      if (result1 != null){
-                        result1.success(result);
-                      }
+                    public void onResult(boolean success, String result) {
+
+                      resultFinish(String.valueOf(REQUEST_CODE_DRIVING_LICENSE),success,imagePath,result);
+
                     }
                   });
         }
         // 识别成功回调，车牌识别
         if (requestCode == REQUEST_CODE_LICENSE_PLATE && resultCode == Activity.RESULT_OK) {
-          RecognizeService.recLicensePlate(registrar.context(), FileUtil.getSaveFile(registrar.context()).getAbsolutePath(),
+          final String imagePath = imageMap.get(String.valueOf(REQUEST_CODE_LICENSE_PLATE));
+          if(submitDialog!=null){
+            submitDialog.show();
+          }
+          RecognizeService.recLicensePlate(registrar.context(), imagePath,
                   new RecognizeService.ServiceListener() {
                     @Override
-                    public void onResult(String result) {
-                      Result result1 = resultMap.get(String.valueOf(REQUEST_CODE_LICENSE_PLATE));
-                      if (result1 != null){
-                        result1.success(result);
-                      }
+                    public void onResult(boolean success, String result) {
+
+                      resultFinish(String.valueOf(REQUEST_CODE_LICENSE_PLATE),success,imagePath,result);
+
                     }
                   });
         }
         // 识别成功回调，通用票据识别
         if (requestCode == REQUEST_CODE_RECEIPT && resultCode == Activity.RESULT_OK) {
-          RecognizeService.recReceipt(registrar.context(), FileUtil.getSaveFile(registrar.context()).getAbsolutePath(),
+          final String imagePath = imageMap.get(String.valueOf(REQUEST_CODE_RECEIPT));
+          RecognizeService.recReceipt(registrar.context(), imagePath,
                   new RecognizeService.ServiceListener() {
                     @Override
-                    public void onResult(String result) {
-                      Result result1 = resultMap.get(String.valueOf(REQUEST_CODE_RECEIPT));
-                      if (result1 != null){
-                        result1.success(result);
-                      }
+                    public void onResult(boolean success, String result) {
+
+                      resultFinish(String.valueOf(REQUEST_CODE_RECEIPT),success,imagePath,result);
+
                     }
                   });
         }
@@ -256,7 +292,7 @@ public class FlutterAipocrPlugin implements MethodCallHandler {
         if (requestCode == REQUEST_CODE_CAMERA && resultCode == Activity.RESULT_OK) {
           if (data != null) {
             String contentType = data.getStringExtra(CameraActivity.KEY_CONTENT_TYPE);
-            String filePath = FileUtil.getSaveFile(registrar.context()).getAbsolutePath();
+            String filePath = imageMap.get(contentType);
             if (!TextUtils.isEmpty(contentType)) {
 
               if (CameraActivity.CONTENT_TYPE_ID_CARD_FRONT.equals(contentType)) {
@@ -272,17 +308,21 @@ public class FlutterAipocrPlugin implements MethodCallHandler {
         // 识别成功回调，营业执照识别
         if (requestCode == REQUEST_CODE_BUSINESS_LICENSE && resultCode == Activity.RESULT_OK) {
           final String contentType = data.getStringExtra(CameraActivity.KEY_CONTENT_TYPE);
-          RecognizeService.recBusinessLicense(registrar.context(), FileUtil.getSaveFile(registrar.context()).getAbsolutePath(),
+          if(submitDialog!=null){
+            submitDialog.show();
+          }
+          final String imagePath = imageMap.get(String.valueOf(REQUEST_CODE_BUSINESS_LICENSE));
+          RecognizeService.recBusinessLicense(registrar.context(), imagePath,
                   new RecognizeService.ServiceListener() {
                     @Override
-                    public void onResult(String result) {
-                      Log.d("mrliuys", result);
+                    public void onResult(boolean success, String result) {
 
-                      Result result1 = resultMap.get(String.valueOf(REQUEST_CODE_BUSINESS_LICENSE));
-                      if (result1 != null){
-                        result1.success(result);
-                      }
+                      resultFinish(String.valueOf(REQUEST_CODE_BUSINESS_LICENSE),success,imagePath,result);
+
                     }
+
+
+
                   });
         }
 
@@ -291,6 +331,34 @@ public class FlutterAipocrPlugin implements MethodCallHandler {
     });
 
   }
+  void resultFinish(String resultKey,boolean isSuccess,String imagePath,String resultStr){
+
+    Log.d("mrliuys ocr: ",resultStr);
+
+    if(submitDialog!=null&&submitDialog.isShowing()){
+      submitDialog.dismiss();
+    }
+
+    Result result1 = resultMap.get(resultKey);
+
+    if (result1 != null) {
+      Map<Object, Object> res = new HashMap<>();
+
+      if (isSuccess){
+        res.put("success",true);
+        res.put("data",resultStr);
+        res.put("imagePath",imagePath);
+      }else {
+        res.put("success",false);
+        res.put("code","1000");
+        res.put("description",resultStr);
+      }
+
+      result1.success(res);
+
+    }
+  }
+
 
   @Override
   public void onMethodCall(MethodCall call, Result result) {
@@ -397,174 +465,200 @@ public class FlutterAipocrPlugin implements MethodCallHandler {
   /// 通用文字识别
   private void generalBasicOCRCall(MethodCall call, Result result) {
 
+    String imgPath = FileUtil.getSaveFile(activity,randomUUID() + ".jpg").getAbsolutePath();
+
     Intent intent = new Intent(activity, CameraActivity.class);
-    intent.putExtra(CameraActivity.KEY_OUTPUT_FILE_PATH,
-            FileUtil.getSaveFile(activity).getAbsolutePath());
+    intent.putExtra(CameraActivity.KEY_OUTPUT_FILE_PATH, imgPath);
     intent.putExtra(CameraActivity.KEY_CONTENT_TYPE,
             CameraActivity.CONTENT_TYPE_GENERAL);
     activity.startActivityForResult(intent, REQUEST_CODE_GENERAL_BASIC);
 
     resultMap.put(String.valueOf(REQUEST_CODE_GENERAL_BASIC),result);
+    imageMap.put(String.valueOf(REQUEST_CODE_GENERAL_BASIC),imgPath);
 
   }
   /// 通用文字识别(高精度版)
   private void generalAccurateBasicOCRCall(MethodCall call, Result result) {
 
+    String imgPath = FileUtil.getSaveFile(activity,randomUUID() + ".jpg").getAbsolutePath();
+
     Intent intent = new Intent(activity, CameraActivity.class);
-    intent.putExtra(CameraActivity.KEY_OUTPUT_FILE_PATH,
-            FileUtil.getSaveFile(activity).getAbsolutePath());
+    intent.putExtra(CameraActivity.KEY_OUTPUT_FILE_PATH, imgPath);
     intent.putExtra(CameraActivity.KEY_CONTENT_TYPE,
             CameraActivity.CONTENT_TYPE_GENERAL);
     activity.startActivityForResult(intent, REQUEST_CODE_ACCURATE_BASIC);
 
     resultMap.put(String.valueOf(REQUEST_CODE_ACCURATE_BASIC),result);
+    imageMap.put(String.valueOf(REQUEST_CODE_ACCURATE_BASIC),imgPath);
 
   }
 
   /// 通用文字识别(含位置信息版)
   private void generalOCRCall(MethodCall call, Result result) {
 
+    String imgPath = FileUtil.getSaveFile(activity,randomUUID() + ".jpg").getAbsolutePath();
+
     Intent intent = new Intent(activity, CameraActivity.class);
     intent.putExtra(CameraActivity.KEY_OUTPUT_FILE_PATH,
-            FileUtil.getSaveFile(activity).getAbsolutePath());
+            imgPath);
     intent.putExtra(CameraActivity.KEY_CONTENT_TYPE,
             CameraActivity.CONTENT_TYPE_GENERAL);
     activity.startActivityForResult(intent, REQUEST_CODE_GENERAL);
 
 
     resultMap.put(String.valueOf(REQUEST_CODE_GENERAL), result);
+    imageMap.put(String.valueOf(REQUEST_CODE_GENERAL),imgPath);
   }
   /// 通用文字识别（含位置信息高精度版）
   private void generalAccurateOCRCall(MethodCall call, Result result) {
 
+    String imgPath = FileUtil.getSaveFile(activity,randomUUID() + ".jpg").getAbsolutePath();
     Intent intent = new Intent(activity, CameraActivity.class);
     intent.putExtra(CameraActivity.KEY_OUTPUT_FILE_PATH,
-            FileUtil.getSaveFile(activity).getAbsolutePath());
+            imgPath);
     intent.putExtra(CameraActivity.KEY_CONTENT_TYPE,
             CameraActivity.CONTENT_TYPE_GENERAL);
     activity.startActivityForResult(intent, REQUEST_CODE_ACCURATE);
     resultMap.put(String.valueOf(REQUEST_CODE_ACCURATE), result);
+    imageMap.put(String.valueOf(REQUEST_CODE_ACCURATE),imgPath);
   }
   /// 通用文字识别（含生僻字版）
   private void generalEnchancedOCRCall(MethodCall call, Result result) {
-
+    String imgPath = FileUtil.getSaveFile(activity,randomUUID() + ".jpg").getAbsolutePath();
 
     Intent intent = new Intent(activity, CameraActivity.class);
     intent.putExtra(CameraActivity.KEY_OUTPUT_FILE_PATH,
-            FileUtil.getSaveFile(activity).getAbsolutePath());
+            imgPath);
     intent.putExtra(CameraActivity.KEY_CONTENT_TYPE,
             CameraActivity.CONTENT_TYPE_GENERAL);
     activity.startActivityForResult(intent, REQUEST_CODE_GENERAL_ENHANCED);
 
-
     resultMap.put(String.valueOf(REQUEST_CODE_GENERAL_ENHANCED), result);
+    imageMap.put(String.valueOf(REQUEST_CODE_GENERAL_ENHANCED),imgPath);
   }
   /// 网络图片识别
   private void webImageOCRCall(MethodCall call, Result result) {
 
+    String imgPath = FileUtil.getSaveFile(activity,randomUUID() + ".jpg").getAbsolutePath();
+
     Intent intent = new Intent(activity, CameraActivity.class);
     intent.putExtra(CameraActivity.KEY_OUTPUT_FILE_PATH,
-            FileUtil.getSaveFile(activity).getAbsolutePath());
+            imgPath);
     intent.putExtra(CameraActivity.KEY_CONTENT_TYPE,
             CameraActivity.CONTENT_TYPE_GENERAL);
     activity.startActivityForResult(intent, REQUEST_CODE_GENERAL_WEBIMAGE);
 
     resultMap.put(String.valueOf(REQUEST_CODE_GENERAL_WEBIMAGE), result);
+    imageMap.put(String.valueOf(REQUEST_CODE_GENERAL_WEBIMAGE),imgPath);
   }
 
   /// 身份证反面拍照识别
   private void idcardOCROnlineBackCall(MethodCall call, Result result) {
 
+    String imgPath = FileUtil.getSaveFile(activity,randomUUID() + ".jpg").getAbsolutePath();
+
     Intent intent = new Intent(activity, CameraActivity.class);
     intent.putExtra(CameraActivity.KEY_OUTPUT_FILE_PATH,
-            FileUtil.getSaveFile(activity).getAbsolutePath());
+            imgPath);
     intent.putExtra(CameraActivity.KEY_CONTENT_TYPE, CameraActivity.CONTENT_TYPE_ID_CARD_BACK);
 
     activity.startActivityForResult(intent, REQUEST_CODE_CAMERA);
 
     resultMap.put(CameraActivity.CONTENT_TYPE_ID_CARD_BACK,result);
+    imageMap.put(CameraActivity.CONTENT_TYPE_ID_CARD_BACK,imgPath);
 
   }
   /// 身份证正面拍照识别
   private void idcardOCROnlineFrontCall(MethodCall call, Result result) {
 
+    String imgPath = FileUtil.getSaveFile(activity,randomUUID() + ".jpg").getAbsolutePath();
+
     Intent intent = new Intent(activity, CameraActivity.class);
     intent.putExtra(CameraActivity.KEY_OUTPUT_FILE_PATH,
-            FileUtil.getSaveFile(activity).getAbsolutePath());
+            imgPath);
     intent.putExtra(CameraActivity.KEY_CONTENT_TYPE, CameraActivity.CONTENT_TYPE_ID_CARD_FRONT);
 
     activity.startActivityForResult(intent, REQUEST_CODE_CAMERA);
 
     resultMap.put(CameraActivity.CONTENT_TYPE_ID_CARD_FRONT,result);
+    imageMap.put(CameraActivity.CONTENT_TYPE_ID_CARD_FRONT,imgPath);
 
   }
 
   /// 银行卡识别
   private void bankCardOCROnlineCall(MethodCall call, Result result) {
 
-
+    String imgPath = FileUtil.getSaveFile(activity,randomUUID() + ".jpg").getAbsolutePath();
     Intent intent = new Intent(activity, CameraActivity.class);
     intent.putExtra(CameraActivity.KEY_OUTPUT_FILE_PATH,
-            FileUtil.getSaveFile(activity).getAbsolutePath());
+            imgPath);
     intent.putExtra(CameraActivity.KEY_CONTENT_TYPE,
             CameraActivity.CONTENT_TYPE_BANK_CARD);
     activity.startActivityForResult(intent, REQUEST_CODE_BANKCARD);
 
 
     resultMap.put(String.valueOf(REQUEST_CODE_BANKCARD),result);
+    imageMap.put(String.valueOf(REQUEST_CODE_BANKCARD),imgPath);
 
   }
   /// 驾驶证识别
   private void drivingLicenseOCRCall(MethodCall call, Result result) {
 
+    String imgPath = FileUtil.getSaveFile(activity,randomUUID() + ".jpg").getAbsolutePath();
     Intent intent = new Intent(activity, CameraActivity.class);
     intent.putExtra(CameraActivity.KEY_OUTPUT_FILE_PATH,
-            FileUtil.getSaveFile(activity).getAbsolutePath());
+            imgPath);
     intent.putExtra(CameraActivity.KEY_CONTENT_TYPE,
             CameraActivity.CONTENT_TYPE_GENERAL);
     activity.startActivityForResult(intent, REQUEST_CODE_DRIVING_LICENSE);
 
     resultMap.put(String.valueOf(REQUEST_CODE_DRIVING_LICENSE),result);
+    imageMap.put(String.valueOf(REQUEST_CODE_DRIVING_LICENSE),imgPath);
 
   }
 
   private void vehicleLicenseOCRCall(MethodCall call, Result result) {
+    String imgPath = FileUtil.getSaveFile(activity,randomUUID() + ".jpg").getAbsolutePath();
 
     Intent intent = new Intent(activity, CameraActivity.class);
     intent.putExtra(CameraActivity.KEY_OUTPUT_FILE_PATH,
-            FileUtil.getSaveFile(activity).getAbsolutePath());
+            imgPath);
     intent.putExtra(CameraActivity.KEY_CONTENT_TYPE,
             CameraActivity.CONTENT_TYPE_GENERAL);
     activity.startActivityForResult(intent,REQUEST_CODE_VEHICLE_LICENSE );
 
     resultMap.put(String.valueOf(REQUEST_CODE_VEHICLE_LICENSE),result);
+    imageMap.put(String.valueOf(REQUEST_CODE_VEHICLE_LICENSE),imgPath);
 
   }
   /// 车牌识别
   private void plateLicenseOCRCall(MethodCall call, Result result) {
-
+    String imgPath = FileUtil.getSaveFile(activity,randomUUID() + ".jpg").getAbsolutePath();
 
     Intent intent = new Intent(activity, CameraActivity.class);
     intent.putExtra(CameraActivity.KEY_OUTPUT_FILE_PATH,
-            FileUtil.getSaveFile(activity).getAbsolutePath());
+            imgPath);
     intent.putExtra(CameraActivity.KEY_CONTENT_TYPE,
             CameraActivity.CONTENT_TYPE_GENERAL);
     activity.startActivityForResult(intent, REQUEST_CODE_LICENSE_PLATE);
 
     resultMap.put(String.valueOf(REQUEST_CODE_LICENSE_PLATE),result);
+    imageMap.put(String.valueOf(REQUEST_CODE_LICENSE_PLATE),imgPath);
 
   }
   /// 通用票据识别
   private void receiptOCRCall(MethodCall call, Result result) {
 
+    String imgPath = FileUtil.getSaveFile(activity,randomUUID() + ".jpg").getAbsolutePath();
     Intent intent = new Intent(activity, CameraActivity.class);
     intent.putExtra(CameraActivity.KEY_OUTPUT_FILE_PATH,
-            FileUtil.getSaveFile(activity).getAbsolutePath());
+            imgPath);
     intent.putExtra(CameraActivity.KEY_CONTENT_TYPE,
             CameraActivity.CONTENT_TYPE_GENERAL);
     activity.startActivityForResult(intent, REQUEST_CODE_RECEIPT);
 
     resultMap.put(String.valueOf(REQUEST_CODE_RECEIPT),result);
+    imageMap.put(String.valueOf(REQUEST_CODE_RECEIPT),imgPath);
 
   }
 
@@ -572,17 +666,25 @@ public class FlutterAipocrPlugin implements MethodCallHandler {
   /// 营业执照
   private void businessLicenseOCRCall(MethodCall call, Result result) {
 
+    String imgPath = FileUtil.getSaveFile(activity,randomUUID() + ".jpg").getAbsolutePath();
+
     Intent intent = new Intent(activity, CameraActivity.class);
     intent.putExtra(CameraActivity.KEY_OUTPUT_FILE_PATH,
-            FileUtil.getSaveFile(activity).getAbsolutePath());
+            imgPath);
     intent.putExtra(CameraActivity.KEY_CONTENT_TYPE,
             CameraActivity.CONTENT_TYPE_GENERAL);
     activity.startActivityForResult(intent, REQUEST_CODE_BUSINESS_LICENSE);
 
-    // TODO: 2019-04-26 唯一编码要调整
-
     resultMap.put(String.valueOf(REQUEST_CODE_BUSINESS_LICENSE),result);
+    imageMap.put(String.valueOf(REQUEST_CODE_BUSINESS_LICENSE),imgPath);
 
+  }
+
+
+  private String randomUUID(){
+
+
+    return UUID.randomUUID().toString();
   }
 
 

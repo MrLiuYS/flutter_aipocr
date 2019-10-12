@@ -27,7 +27,7 @@ import java.io.File;
 public class RecognizeService {
 
     interface ServiceListener {
-        public void onResult(String result);
+        public void onResult(boolean success,String result);
     }
 
     public static void recGeneral(Context ctx, String filePath, final ServiceListener listener) {
@@ -45,12 +45,12 @@ public class RecognizeService {
                     sb.append(word.getWords());
                     sb.append("\n");
                 }
-                listener.onResult(result.getJsonRes());
+                listener.onResult(true,result.getJsonRes());
             }
 
             @Override
             public void onError(OCRError error) {
-                listener.onResult(error.getMessage());
+                listener.onResult(false, error.getMessage());
             }
         });
     }
@@ -70,12 +70,12 @@ public class RecognizeService {
                     sb.append(word.getWords());
                     sb.append("\n");
                 }
-                listener.onResult(result.getJsonRes());
+                listener.onResult(true,result.getJsonRes());
             }
 
             @Override
             public void onError(OCRError error) {
-                listener.onResult(error.getMessage());
+                listener.onResult(false, error.getMessage());
             }
         });
     }
@@ -95,12 +95,12 @@ public class RecognizeService {
                     sb.append(word.getWords());
                     sb.append("\n");
                 }
-                listener.onResult(result.getJsonRes());
+                listener.onResult(true,result.getJsonRes());
             }
 
             @Override
             public void onError(OCRError error) {
-                listener.onResult(error.getMessage());
+                listener.onResult(false, error.getMessage());
             }
         });
     }
@@ -119,12 +119,12 @@ public class RecognizeService {
                     sb.append(word.getWords());
                     sb.append("\n");
                 }
-                listener.onResult(result.getJsonRes());
+                listener.onResult(true,result.getJsonRes());
             }
 
             @Override
             public void onError(OCRError error) {
-                listener.onResult(error.getMessage());
+                listener.onResult(false, error.getMessage());
             }
         });
     }
@@ -142,12 +142,12 @@ public class RecognizeService {
                     sb.append(word.getWords());
                     sb.append("\n");
                 }
-                listener.onResult(result.getJsonRes());
+                listener.onResult(true,result.getJsonRes());
             }
 
             @Override
             public void onError(OCRError error) {
-                listener.onResult(error.getMessage());
+                listener.onResult(false, error.getMessage());
             }
         });
     }
@@ -165,12 +165,12 @@ public class RecognizeService {
                     sb.append(word.getWords());
                     sb.append("\n");
                 }
-                listener.onResult(result.getJsonRes());
+                listener.onResult(true,result.getJsonRes());
             }
 
             @Override
             public void onError(OCRError error) {
-                listener.onResult(error.getMessage());
+                listener.onResult(false, error.getMessage());
             }
         });
     }
@@ -181,16 +181,16 @@ public class RecognizeService {
         OCR.getInstance(ctx).recognizeBankCard(param, new OnResultListener<BankCardResult>() {
             @Override
             public void onResult(BankCardResult result) {
-                String res = String.format("卡号：%s\n类型：%s\n发卡行：%s",
-                        result.getBankCardNumber(),
-                        result.getBankCardType().name(),
-                        result.getBankName());
-                listener.onResult(res);
+//                String res = String.format("卡号：%s\n类型：%s\n发卡行：%s",
+//                        result.getBankCardNumber(),
+//                        result.getBankCardType().name(),
+//                        result.getBankName());
+                listener.onResult(true,result.getJsonRes());
             }
 
             @Override
             public void onError(OCRError error) {
-                listener.onResult(error.getMessage());
+                listener.onResult(false, error.getMessage());
             }
         });
     }
@@ -201,12 +201,12 @@ public class RecognizeService {
         OCR.getInstance(ctx).recognizeVehicleLicense(param, new OnResultListener<OcrResponseResult>() {
             @Override
             public void onResult(OcrResponseResult result) {
-                listener.onResult(result.getJsonRes());
+                listener.onResult(true,result.getJsonRes());
             }
 
             @Override
             public void onError(OCRError error) {
-                listener.onResult(error.getMessage());
+                listener.onResult(false, error.getMessage());
             }
         });
     }
@@ -217,12 +217,12 @@ public class RecognizeService {
         OCR.getInstance(ctx).recognizeDrivingLicense(param, new OnResultListener<OcrResponseResult>() {
             @Override
             public void onResult(OcrResponseResult result) {
-                listener.onResult(result.getJsonRes());
+                listener.onResult(true,result.getJsonRes());
             }
 
             @Override
             public void onError(OCRError error) {
-                listener.onResult(error.getMessage());
+                listener.onResult(false, error.getMessage());
             }
         });
     }
@@ -233,12 +233,12 @@ public class RecognizeService {
         OCR.getInstance(ctx).recognizeLicensePlate(param, new OnResultListener<OcrResponseResult>() {
             @Override
             public void onResult(OcrResponseResult result) {
-                listener.onResult(result.getJsonRes());
+                listener.onResult(true,result.getJsonRes());
             }
 
             @Override
             public void onError(OCRError error) {
-                listener.onResult(error.getMessage());
+                listener.onResult(false, error.getMessage());
             }
         });
     }
@@ -249,12 +249,12 @@ public class RecognizeService {
         OCR.getInstance(ctx).recognizeBusinessLicense(param, new OnResultListener<OcrResponseResult>() {
             @Override
             public void onResult(OcrResponseResult result) {
-                listener.onResult(result.getJsonRes());
+                listener.onResult(true,result.getJsonRes());
             }
 
             @Override
             public void onError(OCRError error) {
-                listener.onResult(error.getMessage());
+                listener.onResult(false, error.getMessage());
             }
         });
     }
@@ -266,12 +266,12 @@ public class RecognizeService {
         OCR.getInstance(ctx).recognizeReceipt(param, new OnResultListener<OcrResponseResult>() {
             @Override
             public void onResult(OcrResponseResult result) {
-                listener.onResult(result.getJsonRes());
+                listener.onResult(true,result.getJsonRes());
             }
 
             @Override
             public void onError(OCRError error) {
-                listener.onResult(error.getMessage());
+                listener.onResult(false, error.getMessage());
             }
         });
     }
@@ -282,12 +282,12 @@ public class RecognizeService {
         OCR.getInstance(ctx).recognizePassport(param, new OnResultListener<OcrResponseResult>() {
             @Override
             public void onResult(OcrResponseResult result) {
-                listener.onResult(result.getJsonRes());
+                listener.onResult(true,result.getJsonRes());
             }
 
             @Override
             public void onError(OCRError error) {
-                listener.onResult(error.getMessage());
+                listener.onResult(false, error.getMessage());
             }
         });
     }
@@ -298,12 +298,12 @@ public class RecognizeService {
         OCR.getInstance(ctx).recognizeVatInvoice(param, new OnResultListener<OcrResponseResult>() {
             @Override
             public void onResult(OcrResponseResult result) {
-                listener.onResult(result.getJsonRes());
+                listener.onResult(true,result.getJsonRes());
             }
 
             @Override
             public void onError(OCRError error) {
-                listener.onResult(error.getMessage());
+                listener.onResult(false, error.getMessage());
             }
         });
     }
@@ -314,12 +314,12 @@ public class RecognizeService {
         OCR.getInstance(ctx).recognizeQrcode(param, new OnResultListener<OcrResponseResult>() {
             @Override
             public void onResult(OcrResponseResult result) {
-                listener.onResult(result.getJsonRes());
+                listener.onResult(true,result.getJsonRes());
             }
 
             @Override
             public void onError(OCRError error) {
-                listener.onResult(error.getMessage());
+                listener.onResult(false, error.getMessage());
             }
         });
     }
@@ -330,12 +330,12 @@ public class RecognizeService {
         OCR.getInstance(ctx).recognizeNumbers(param, new OnResultListener<OcrResponseResult>() {
             @Override
             public void onResult(OcrResponseResult result) {
-                listener.onResult(result.getJsonRes());
+                listener.onResult(true,result.getJsonRes());
             }
 
             @Override
             public void onError(OCRError error) {
-                listener.onResult(error.getMessage());
+                listener.onResult(false, error.getMessage());
             }
         });
     }
@@ -346,12 +346,12 @@ public class RecognizeService {
         OCR.getInstance(ctx).recognizeLottery(param, new OnResultListener<OcrResponseResult>() {
             @Override
             public void onResult(OcrResponseResult result) {
-                listener.onResult(result.getJsonRes());
+                listener.onResult(true,result.getJsonRes());
             }
 
             @Override
             public void onError(OCRError error) {
-                listener.onResult(error.getMessage());
+                listener.onResult(false, error.getMessage());
             }
         });
     }
@@ -362,12 +362,12 @@ public class RecognizeService {
         OCR.getInstance(ctx).recognizeBusinessCard(param, new OnResultListener<OcrResponseResult>() {
             @Override
             public void onResult(OcrResponseResult result) {
-                listener.onResult(result.getJsonRes());
+                listener.onResult(true,result.getJsonRes());
             }
 
             @Override
             public void onError(OCRError error) {
-                listener.onResult(error.getMessage());
+                listener.onResult(false, error.getMessage());
             }
         });
     }
@@ -378,12 +378,12 @@ public class RecognizeService {
         OCR.getInstance(ctx).recognizeHandwriting(param, new OnResultListener<OcrResponseResult>() {
             @Override
             public void onResult(OcrResponseResult result) {
-                listener.onResult(result.getJsonRes());
+                listener.onResult(true,result.getJsonRes());
             }
 
             @Override
             public void onError(OCRError error) {
-                listener.onResult(error.getMessage());
+                listener.onResult(false, error.getMessage());
             }
         });
     }
@@ -396,12 +396,12 @@ public class RecognizeService {
         OCR.getInstance(ctx).recognizeCustom(param, new OnResultListener<OcrResponseResult>() {
             @Override
             public void onResult(OcrResponseResult result) {
-                listener.onResult(result.getJsonRes());
+                listener.onResult(true,result.getJsonRes());
             }
 
             @Override
             public void onError(OCRError error) {
-                listener.onResult(error.getMessage());
+                listener.onResult(false, error.getMessage());
             }
         });
     }

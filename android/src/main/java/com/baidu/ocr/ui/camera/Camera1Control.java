@@ -20,7 +20,7 @@ import android.graphics.SurfaceTexture;
 import android.graphics.YuvImage;
 import android.hardware.Camera;
 
-import android.support.v4.app.ActivityCompat;
+import androidx.core.app.ActivityCompat;
 import android.view.TextureView;
 import android.view.View;
 import android.widget.FrameLayout;
@@ -338,6 +338,10 @@ public class Camera1Control implements ICameraControl {
                 }
 
             }
+            if(camera==null){
+//                startPreview(true);
+                return;
+            }
             if (parameters == null) {
                 parameters = camera.getParameters();
                 parameters.setPreviewFormat(ImageFormat.NV21);
@@ -378,7 +382,9 @@ public class Camera1Control implements ICameraControl {
 
     // 开启预览
     private void startPreview(boolean checkPermission) {
-        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.CAMERA)
+        //外层调用时已经检查 ，且这里没有判断版本
+        final boolean targetsMOrHigher = context.getApplicationInfo().targetSdkVersion >= android.os.Build.VERSION_CODES.M;
+        if (targetsMOrHigher&&ActivityCompat.checkSelfPermission(context, Manifest.permission.CAMERA)
                 != PackageManager.PERMISSION_GRANTED) {
             if (checkPermission && permissionCallback != null) {
                 permissionCallback.onRequestPermission();
