@@ -20,7 +20,7 @@ import android.graphics.SurfaceTexture;
 import android.graphics.YuvImage;
 import android.hardware.Camera;
 
-import android.support.v4.app.ActivityCompat;
+import androidx.core.app.ActivityCompat;
 import android.view.TextureView;
 import android.view.View;
 import android.widget.FrameLayout;
